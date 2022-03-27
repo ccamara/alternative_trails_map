@@ -1,7 +1,7 @@
 # Alternative Trails
 
 
-An open source prototype for a visual interface to support research and Nexus engagements, designed collaborativelly as part of [Creating interfaces](https://creatinginterfaces.eifer.kit.edu/)' WP4.
+An open source prototype for a an online map.
 
 
 ## Installation
