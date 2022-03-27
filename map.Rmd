@@ -7,123 +7,112 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(htmltools)
+library(htmlwidgets)
 library(leaflet)
+library(leaflet.extras)
 
 # Load data
-df <- read.csv("data/data.csv")
+df <- read.csv("data/alternative_trails_data.csv") 
 
+df$category <- as.factor(df$category)
+
+# place <- photon::geocode(df$address, limit = 1, key = "place") 
+# place$id <- rownames(place)
+
+col_green <- "#258001"
+col_purple <- "#9b009a"
 ```
-
-```{r ggplot_defaults}
-# Custom ggplot theme.
-mytheme_minimal <- theme_minimal(base_size = 12) +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major.x = element_blank(),
-        plot.caption = element_text(size = 8, face = "italic", 
-                                    colour = "grey60"),
-        plot.subtitle = element_text(size = 9, face = "plain", 
-                                     colour = "grey50"),
-        axis.ticks = element_line(colour = "grey80"),
-        axis.ticks.length = unit(2, "pt"),
-        strip.text = element_text(size = 12))
-
-mytheme <- theme_minimal(base_size = 12) +
-  theme(plot.caption = element_text(size = 8, face = "italic", 
-                                    colour = "grey60"),
-        plot.subtitle = element_text(size = 9, face = "plain", 
-                                     colour = "grey50"),
-        axis.ticks = element_line(colour = "grey80"),
-        axis.ticks.length = unit(2, "pt"),
-        strip.text = element_text(size = 12))
-
-theme_set(mytheme_minimal)
-
-
-```
-
 
 
 ### Interactive map
-    
+
 ```{r}
-groups <- c("Group1", "Group2")
 
-getMkColor <- function(df) {
-  sapply(df$data_type, function(data_type) {
-  if(data_type == "Group1") {
-    "orange"
-  } else if(data_type == "Group2") {
-    "green"
-  } else {
-    "red"
-  } })
-}
-
-getMkIcon <- function(df) {
+getColor <- function(df) {
   sapply(df$category, function(category) {
-  if(category == "dairy_products_ro") {
-    "orange"
-  } else if(data_type == "fruits_ro") {
-    "fa-apple-alt"
+  if(category == "Organisations") {
+    "green"
+  } else if(category == "Whatever") {
+    "blue"
   } else {
-    "fa-apple-alt"
+    "purple"
   } })
 }
+
+# icons <- awesomeIcons(
+#   icon = 'fa-arrows-to-circle',
+#   Or, conditions
+#   icon = ifelse(
+      #   test = combined_df$data_type == "1 Outstanding",
+      #   yes = "ion-android-star-outline",
+      #   no = "ion-android-radio-button-off"
+#   )
+#   iconColor = 'white',
+#   library = 'fa',
+#   markerColor = getColor(df)
+# )
+
+icons <- awesomeIcons(
+  icon = 'ios-close',
+  iconColor = 'black',
+  library = 'ion',
+  markerColor = getColor(df)
+)
+
 
 popup_content <- paste0(
-      "<h5>", combined_df$name, "</h5>",
+      "<h5>", df$name, "</h5>",
       
       "<table style='width:100%'>",
       
       "<tr>",
       "<th>Type</th>",
-      "<td>", combined_df$type, "</td>",
+      "<td>", df$category, "</td>",
       "</tr>",
       
       "<tr>",
       "<tr>",
       "<th>Address</th>",
-      "<td>", combined_df$address, "</td>",
-      "</tr>")
+      "<td>", df$address, "</td>",
+      "</tr>",
+      
+      "<tr>",
+      "<th>image</th>",
+      "<td> <img src='", df$img, "'></td>",
+      "</tr>",
+      
+      "</table>"
+)
 
-map <- leaflet(sd) %>% 
+map <- leaflet(df) %>% 
   addProviderTiles("CartoDB.Positron", group = "Positron (default)", 
                    layerId = "basetile") %>% 
-  addTiles(group = "OSM") %>% 
-  addProviderTiles(providers$Stamen.Toner, group = "Toner") %>%
-  addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") %>%
   # Add data
   addAwesomeMarkers(
-    data = sd, ~longitude, ~latitude, 
+    ~lon, ~lat,
     popup = ~popup_content,
     label = ~name,
-    icon = awesomeIcons(
-      library = "ion",
-      # icon = ifelse(
-      #   test = combined_df$data_type == "1 Outstanding",
-      #   yes = "ion-android-star-outline",
-      #   no = "ion-android-radio-button-off"
-      # ),
-      iconColor = "white",
-      markerColor = getMkColor(combined_df)
-    ) # end of icon
-  ) %>%
-  # Adds controls
-  addLayersControl(
-    baseGroups = c("Positron (default)", "OSM", "Toner", "Toner Lite"),
-    overlayGroups = groups,
-    options = layersControlOptions(collapsed = TRUE)
+    icon=icons
   ) %>% 
-  addLegend("bottomright", 
-    colors =c("orange", "green", "red"),
-    labels= c("Sale points", "Producers", "Other"),
-    title= "Type of data",
-    opacity = 1) %>% 
+  # Adds controls
+  addFullscreenControl()
+  # addLayersControl(
+  #   baseGroups = c("Positron (default)", "OSM", "Toner", "Toner Lite"),
+  #   overlayGroups = groups,
+  #   options = layersControlOptions(collapsed = TRUE)
+  # ) 
+  # addLegend("bottomright", 
+  #   colors =c("orange", "green", "red"),
+  #   labels= c("Sale points", "Producers", "Other"),
+  #   title= "Type of data",
+  #   opacity = 1)  
   # addMiniMap(
   #   tiles = providers$CartoDB.Positron,
-  #   toggleDisplay = TRUE ) %>% 
-  leaflet::addMeasure()
+  #   toggleDisplay = TRUE ) 
 
-map
+
+map 
+
+saveWidget(map, file = "alternative_trails_map_standalone.html")
 ```
 
