@@ -59,6 +59,9 @@ icons <- awesomeIcons(
   markerColor = getColor(df)
 )
 
+# Colors for circle markers.
+pal <- colorFactor(c(col_green, col_purple), 
+                   domain = c("Organisations", "Meeting Places"))
 
 popup_content <- paste0(
       "<h5>", df$name, "</h5>",
@@ -85,30 +88,42 @@ popup_content <- paste0(
 )
 
 map <- leaflet(df) %>% 
-  addProviderTiles("CartoDB.Positron", group = "Positron (default)", 
+  addProviderTiles("CartoDB.Positron", group = "Positron", 
                    layerId = "basetile") %>% 
+  addProviderTiles(providers$Stamen.Toner, group = "Toner") %>%
+  addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") %>%
+  addProviderTiles(providers$CartoDB.Voyager, group = "Voyager") %>% 
+  addProviderTiles(providers$Esri.WorldImagery, group = "ESRI World Imagery",
+                   options = providerTileOptions(opacity = 0.5)) %>% 
   # Add data
-  addAwesomeMarkers(
-    ~lon, ~lat,
+  # addAwesomeMarkers(
+  #   ~lon, ~lat,
+  #   popup = ~popup_content,
+  #   label = ~name,
+  #   icon=icons
+  # ) %>% 
+  addCircleMarkers(
+    radius = 10,
+    color = ~pal(category),
+    stroke = FALSE, fillOpacity = 0.5,
     popup = ~popup_content,
-    label = ~name,
-    icon=icons
+    label = ~name
   ) %>% 
   # Adds controls
-  addFullscreenControl()
-  # addLayersControl(
-  #   baseGroups = c("Positron (default)", "OSM", "Toner", "Toner Lite"),
-  #   overlayGroups = groups,
-  #   options = layersControlOptions(collapsed = TRUE)
-  # ) 
+  addFullscreenControl() %>% 
+  addLayersControl(
+    baseGroups = c("Toner", "Toner Lite", "Positron", "Voyager", "ESRI World Imagery"),
+    # overlayGroups = groups,
+    options = layersControlOptions(collapsed = TRUE)
+  ) %>% 
   # addLegend("bottomright", 
   #   colors =c("orange", "green", "red"),
   #   labels= c("Sale points", "Producers", "Other"),
   #   title= "Type of data",
   #   opacity = 1)  
-  # addMiniMap(
-  #   tiles = providers$CartoDB.Positron,
-  #   toggleDisplay = TRUE ) 
+  addMiniMap(
+    tiles = providers$CartoDB.Positron,
+    toggleDisplay = TRUE )
 
 
 map 
