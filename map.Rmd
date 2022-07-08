@@ -10,12 +10,12 @@ library(htmltools)
 library(htmlwidgets)
 library(leaflet)
 library(leaflet.extras)
-library(leaflet.extras2)
-library(crosstalk)
-library(reactable)
+
 
 # Load data
 df <- read.csv("data/alternative_trails_data.csv") 
+
+df$img[df$img == ""] <- "blank.png"   
 
 df$category <- as.factor(df$category)
 
@@ -68,11 +68,13 @@ pal <- colorFactor(c(col_green, col_purple),
 
 popup_content <- paste0(
       "<h3><a href='", df$url,"' target='_blank'>", df$name, "</a></h5>",
-      "<div><p>Addr: ", df$address,"</p></div>",
-      "<div> <img src='img/", df$img, "' style='max-width:300px'></div>",
+      if(df$address != ""){paste0("<div><p>Addr: ", df$address,"</p></div>")},
+      if(df$img != ""){paste0("<div> <img src='img/", df$img, "' style='max-width:300px'></div>")},
       "<div><p style='overflow-y: scroll;max-height: 250px;'>", df$text, "</p></div>",
-      "<div><audio controls><source src='audio/", df$audio, "' type='audio/mpeg'> Your browser does not support the audio element</audio></div>",
-      df$soundcloud)
+      if(df$img_2 != ""){paste0("<div> <img src='img/", df$img_2, "' style='max-width:300px'></div>")},
+      if(df$audio != ""){paste0("<div><audio controls><source src='audio/", df$audio, "' type='audio/mpeg'> Your browser does not support the audio element</audio></div>")})
+
+
 
 map <- leaflet(df) %>% 
   addProviderTiles("CartoDB.Positron", group = "Positron", 
@@ -118,7 +120,7 @@ map
 saveWidget(map, file = "alternative_trails_map_standalone.html")
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 
 shared_df <-  SharedData$new(df)
 
