@@ -23,7 +23,8 @@ df <- read.csv("data/alternative_trails_data.csv") %>%
     cagegory = as.factor(category),
     popup_url = case_when(
       url !="" ~  paste0(
-       "<h3><a href='", url,"' target='_blank'>", name, "</a></h3>")
+       "<h3><a href='", url,"' target='_blank'>", name, "</a></h3>"),
+      TRUE ~ paste0("<h3>", name, "</h3>")
     ),
     popup_address = case_when(
       address != "" ~ paste0("<div><i>Addr: ", address,"</i></br></div>")
