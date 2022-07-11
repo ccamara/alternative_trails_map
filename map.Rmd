@@ -35,7 +35,7 @@ df <- read.csv("data/alternative_trails_data.csv") %>%
       img_2 != "" ~ paste0("<div> <img src='img/", img_2, "' style='max-width:290px;max-height:200px'></div>"),
       TRUE ~""),
     popup_text = case_when(
-      text != "" ~ paste0("<divs style='display:block;overflow-y:scroll;max-height: 250px;margin-top:5px;margin-bottom:5px'>", text, "</div>"),
+      text != "" ~ paste0("<divs style='display:block;overflow-y:auto;max-height: 250px;margin-top:5px;margin-bottom:5px'>", text, "</div>"),
     ),
     popup_audio1 = case_when(
       audio != "" ~ paste0("<div><audio controls><source src='audio/", audio, "' type='audio/mpeg'> Your browser does not support the audio element</audio></div>"),
@@ -46,7 +46,7 @@ df <- read.csv("data/alternative_trails_data.csv") %>%
     popup_audio3 = case_when(
       audio_3 != "" ~ paste0("<div><audio controls><source src='audio/", audio_3, "' type='audio/mpeg'> Your browser does not support the audio element</audio></div>")),
     popup_img = case_when(
-      img != "" ~ paste0("<div style='max-height:203px;display:flex;overflow-x:scroll;overflow-y:hidden'>", 
+      img != "" ~ paste0("<div style='max-height:203px;display:flex;overflow-x:auto;overflow-y:hidden'>", 
                        popup_img1,
                        popup_img2,
                        "</div>"))) %>% 
