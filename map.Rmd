@@ -21,18 +21,20 @@ library(tidyr)
 df <- read.csv("data/alternative_trails_data.csv") %>%
   mutate(
     cagegory = as.factor(category),
-    popup_url = paste0(
-       "<h3><a href='", url,"' target='_blank'>", name, "</a></h3>"),
+    popup_url = case_when(
+      url !="" ~  paste0(
+       "<h3><a href='", url,"' target='_blank'>", name, "</a></h3>")
+    ),
     popup_address = case_when(
       address != "" ~ paste0("<div><i>Addr: ", address,"</i></br></div>")
     ),
     popup_img1 = case_when(
-      img != "" ~ paste0("<div> <img src='img/", img, "' style='max-width:290px;max-height:200px'></div>")),
+      img != "" ~ paste0("<div> <img src='img/", img, "' style='max-width:290px;max-height:200px;padding-right:5px'></div>")),
     popup_img2 = case_when(
       img_2 != "" ~ paste0("<div> <img src='img/", img_2, "' style='max-width:290px;max-height:200px'></div>"),
       TRUE ~""),
     popup_text = case_when(
-      text != "" ~ paste0("<div><p style='overflow-y: scroll;max-height: 250px;'>", text, "</p></div>"),
+      text != "" ~ paste0("<divs style='display:block;overflow-y:scroll;max-height: 250px;margin-top:5px;margin-bottom:5px'>", text, "</div>"),
     ),
     popup_audio1 = case_when(
       audio != "" ~ paste0("<div><audio controls><source src='audio/", audio, "' type='audio/mpeg'> Your browser does not support the audio element</audio></div>"),
@@ -73,50 +75,9 @@ col_blue <- "#00407A"
 
 ```{r}
 
-getColor <- function(df) {
-  sapply(df$category, function(category) {
-  if(category == "Organisations") {
-    "green"
-  } else if(category == "Other") {
-    "blue"
-  } else {
-    "purple"
-  } })
-}
-
-# icons <- awesomeIcons(
-#   icon = 'fa-arrows-to-circle',
-#   Or, conditions
-#   icon = ifelse(
-      #   test = combined_df$data_type == "1 Outstanding",
-      #   yes = "ion-android-star-outline",
-      #   no = "ion-android-radio-button-off"
-#   )
-#   iconColor = 'white',
-#   library = 'fa',
-#   markerColor = getColor(df)
-# )
-
-icons <- awesomeIcons(
-  icon = 'ios-close',
-  iconColor = 'black',
-  library = 'ion',
-  markerColor = getColor(df)
-)
-
 # Colors for circle markers.
-pal <- colorFactor(c(col_green, col_purple), 
-                   domain = c("Organisations", "Meeting Places"))
-
-popup_content <- paste0(
-      "<h3><a href='", df$url,"' target='_blank'>", df$name, "</a></h5>",
-      if(df$address != ""){paste0("<div><p>Addr: ", df$address,"</p></div>")},
-      if(df$img != ""){paste0("<div> <img src='img/", df$img, "' style='max-width:300px'></div>")},
-      "<div><p style='overflow-y: scroll;max-height: 250px;'>", df$text, "</p></div>",
-      if(df$img_2 != ""){paste0("<div> <img src='img/", df$img_2, "' style='max-width:300px'></div>")},
-      if(df$audio != ""){paste0("<div><audio controls><source src='audio/", df$audio, "' type='audio/mpeg'> Your browser does not support the audio element</audio></div>")})
-
-
+pal <- colorFactor(c(col_green, col_purple, col_blue), 
+                   domain = c("Organisations", "Meeting Places", "Other"))
 
 map <- leaflet(df) %>% 
   addProviderTiles("CartoDB.Positron", group = "Positron", 
@@ -141,10 +102,10 @@ map <- leaflet(df) %>%
     options = layersControlOptions(collapsed = TRUE)
   ) %>% 
   addLegend("bottomleft",
-    colors =c(col_green, col_purple),
-    labels= c("Meeting Places", "Organisations"),
+    colors =c(col_green, col_purple, col_blue),
+    labels= c("Meeting Places", "Organisations", "Other"),
     title= "Type of marker",
-    opacity = 1)  %>%
+    opacity = 0.5)  %>%
   addMiniMap(
     tiles = providers$CartoDB.Positron,
     toggleDisplay = TRUE ) 
