@@ -1,21 +1,63 @@
 ---
-title: "Alternative trails"
-author: "Carlos Cámara"
-date: "24/3/2022"
+title: "Mapping South Asian Women’s Activism"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
 library(htmltools)
 library(htmlwidgets)
 library(leaflet)
 library(leaflet.extras)
+library(dplyr)
+library(tidyr)
 
 
 # Load data
-df <- read.csv("data/alternative_trails_data.csv") 
+df <- read.csv("data/alternative_trails_data.csv") %>%
+  mutate(
+    cagegory = as.factor(category),
+    popup_url = paste0(
+       "<h3><a href='", url,"' target='_blank'>", name, "</a></h3>"),
+    popup_address = case_when(
+      address != "" ~ paste0("<div><i>Addr: ", address,"</i></br></div>")
+    ),
+    popup_img1 = case_when(
+      img != "" ~ paste0("<div> <img src='img/", img, "' style='max-width:290px;max-height:200px'></div>")),
+    popup_img2 = case_when(
+      img_2 != "" ~ paste0("<div> <img src='img/", img_2, "' style='max-width:290px;max-height:200px'></div>"),
+      TRUE ~""),
+    popup_text = case_when(
+      text != "" ~ paste0("<div><p style='overflow-y: scroll;max-height: 250px;'>", text, "</p></div>"),
+    ),
+    popup_audio1 = case_when(
+      audio != "" ~ paste0("<div><audio controls><source src='audio/", audio, "' type='audio/mpeg'> Your browser does not support the audio element</audio></div>"),
+    ),
+    popup_audio2 = case_when(
+      audio_2 != "" ~ paste0("<div><audio controls><source src='audio/", audio_2, "' type='audio/mpeg'> Your browser does not support the audio element</audio></div>"),
+    ),
+    popup_audio3 = case_when(
+      audio_3 != "" ~ paste0("<div><audio controls><source src='audio/", audio_3, "' type='audio/mpeg'> Your browser does not support the audio element</audio></div>")),
+    popup_img = case_when(
+      img != "" ~ paste0("<div style='max-height:203px;display:flex;overflow-x:scroll;overflow-y:hidden'>", 
+                       popup_img1,
+                       popup_img2,
+                       "</div>"))) %>% 
+  unite("popup_full", c(popup_url,
+      popup_address,
+      popup_img,
+      popup_text,
+      popup_audio1,
+      popup_audio2,
+      popup_audio3), sep=" ", remove = FALSE, na.rm = TRUE) %>% 
+  mutate(popup_full = paste0("<div style='overflow:hidden'>", popup_full, "</div>"))
+      
 
-df$img[df$img == ""] <- "blank.png"   
+# df$img[df$img == ""] <- "blank.png"   
 
 df$category <- as.factor(df$category)
 
@@ -24,10 +66,10 @@ df$category <- as.factor(df$category)
 
 col_green <- "#258001"
 col_purple <- "#9b009a"
+col_blue <- "#00407A"
 ```
 
 
-### Interactive map
 
 ```{r}
 
@@ -35,7 +77,7 @@ getColor <- function(df) {
   sapply(df$category, function(category) {
   if(category == "Organisations") {
     "green"
-  } else if(category == "Whatever") {
+  } else if(category == "Other") {
     "blue"
   } else {
     "purple"
@@ -84,18 +126,11 @@ map <- leaflet(df) %>%
   addProviderTiles(providers$CartoDB.Voyager, group = "Voyager") %>% 
   addProviderTiles(providers$Esri.WorldImagery, group = "ESRI World Imagery",
                    options = providerTileOptions(opacity = 0.5)) %>% 
-  # Add data
-  # addAwesomeMarkers(
-  #   ~lon, ~lat,
-  #   popup = ~popup_content,
-  #   label = ~name,
-  #   icon=icons
-  # ) %>% 
   addCircleMarkers(
     radius = 10,
     color = ~pal(category),
     stroke = FALSE, fillOpacity = 0.5,
-    popup = ~popup_content,
+    popup = ~popup_full,
     label = ~name
   ) %>% 
   # Adds controls
@@ -105,14 +140,14 @@ map <- leaflet(df) %>%
     # overlayGroups = groups,
     options = layersControlOptions(collapsed = TRUE)
   ) %>% 
-  # addLegend("bottomright", 
-  #   colors =c("orange", "green", "red"),
-  #   labels= c("Sale points", "Producers", "Other"),
-  #   title= "Type of data",
-  #   opacity = 1)  
+  addLegend("bottomleft",
+    colors =c(col_green, col_purple),
+    labels= c("Meeting Places", "Organisations"),
+    title= "Type of marker",
+    opacity = 1)  %>%
   addMiniMap(
     tiles = providers$CartoDB.Positron,
-    toggleDisplay = TRUE )
+    toggleDisplay = TRUE ) 
 
 
 map 
