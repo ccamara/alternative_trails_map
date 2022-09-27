@@ -78,7 +78,8 @@ col_blue <- "#00407A"
 
 # Colors for circle markers.
 pal <- colorFactor(c(col_green, col_purple, col_blue), 
-                   domain = c("Organisations", "Meeting Places", "Other"))
+                   domain = c("Organisations", "Meeting Places", 
+                              "Other"))
 
 map <- leaflet(df) %>% 
   addProviderTiles("CartoDB.Positron", group = "Positron", 
@@ -104,7 +105,7 @@ map <- leaflet(df) %>%
   ) %>% 
   addLegend("bottomleft",
     colors =c(col_green, col_purple, col_blue),
-    labels= c("Meeting Places", "Organisations", "Other"),
+    labels= c("Meeting Places", "Organisations", "The word 'Activism'"),
     title= "Type of marker",
     opacity = 0.5)  %>%
   addMiniMap(
