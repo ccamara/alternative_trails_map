@@ -70,6 +70,7 @@ df$category <- as.factor(df$category)
 col_green <- "#258001"
 col_purple <- "#9b009a"
 col_blue <- "#00407A"
+col_red <- "#FF5154"
 ```
 
 
@@ -77,7 +78,7 @@ col_blue <- "#00407A"
 ```{r}
 
 # Colors for circle markers.
-pal <- colorFactor(c(col_green, col_purple, col_blue), 
+pal <- colorFactor(c(col_green, col_purple, col_red), 
                    domain = c("Organisations", "Meeting Places", 
                               "Other"))
 
@@ -104,7 +105,7 @@ map <- leaflet(df) %>%
     options = layersControlOptions(collapsed = TRUE)
   ) %>% 
   addLegend("bottomleft",
-    colors =c(col_green, col_purple, col_blue),
+    colors =c(col_purple, col_green, col_red),
     labels= c("Meeting Places", "Organisations", "The word 'Activism'"),
     title= "Type of marker",
     opacity = 0.5)  %>%
